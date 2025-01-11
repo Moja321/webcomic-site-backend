@@ -11,9 +11,19 @@ const mongoose = require("mongoose");
 
 const session = require("express-session");
 
+const cors=require("cors");
+const corsOptions ={
+   origin:'http://localhost:3000', 
+   credentials:true,            //access-control-allow-credentials:true
+   optionSuccessStatus:200,
+}
+
+app.use(cors(corsOptions)) // Use this after the variable declaration
+
 //middlewares:
 
 //need urlencoded to read encoded data from urls and add them to req.body
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //need express-session for session cookies/login function
@@ -89,9 +99,13 @@ app.get("/", isAuthenticated, (req,res) => {
 
         //notice here that the express-session session object is always stored/ can be retrieved from a routes request object
         console.log(req.session.user["username"]);
-        res.render("index", {loggedInUser: (req.session.user["username"]) || "none"});
+        //res.send({LoggedUser: req.session.user["username"]});
+        res.send(req.session.user);
+
+        //res.render("index", {loggedInUser: (req.session.user["username"]) || "none"});
     } else {
-        res.render("index");
+        //res.render("index");
+        res.send({Msg : "Session does not exist"});
     }
         
 })

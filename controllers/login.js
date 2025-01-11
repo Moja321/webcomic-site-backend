@@ -58,7 +58,10 @@ router.post("/",(req,res)=>{
                         if (err) return next(err);
                         //For logins, its recommended that we redirect first to another url 
                         //which will request a GET method to render the page, see index.js
+
                         res.redirect("/");
+
+                        //res.send({Msg: "User found!!", ReqBody: req.body, Session: req.session});
                     })
 
                 })
@@ -67,11 +70,14 @@ router.post("/",(req,res)=>{
 
             //res.send(JSON.parse("Username or password is wrong")); //check status on react
 
-            res.render("index.ejs",{info: "User does not exist"});
+            //res.render("index.ejs",{info: "User does not exist"});
+            res.send({Msg : "User exists but password is wrong"});
             }
         } else if (!result) {
             //let loginMsg = "User does not exist";
-            res.render("index.ejs",{info: "User doesn't exist"});//make sure to use <%- instead of <%= in index.ejs so that the symbols work (unescaped)
+            //res.render("index.ejs",{info: "User doesn't exist"});//make sure to use <%- instead of <%= in index.ejs so that the symbols work (unescaped)
+            console.log(req.body.username);
+            res.send({Msg : "No result", ReqBody: req.body});
         }
 
     }).catch((error)=>{
