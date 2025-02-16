@@ -4,7 +4,7 @@ const user = require("../models/user_schema.js");
 const fs = require('fs');
 const fse = require('fs-extra');
 const mv = require("mv");
-//const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
 //normal functions
 const findComic = (comicsarr,comicid) => {
@@ -127,7 +127,7 @@ router.get("/",(req,res)=>{
 
     //TODO:
     //Get all users using mongoose query and save to a variable, and pass it to res.render
-    user.find({},'comics')
+    user.find({},{'comics.chapters' : 0, 'email' : 0, 'password' : 0})
     .then((result)=>{
 
         console.log(result);
@@ -139,20 +139,24 @@ router.get("/",(req,res)=>{
         // }
 
         //res.render("all_comicspage", {text: "all users", users: result});
-        if (req.session.user){
-            res.render("all_comicspage", {text: "all comics", comicsarr: result, loggedInUser: (req.session.user["username"]) || "none" });
-        } else {
-            res.render("all_comicspage", {text: "all comics", comicsarr: result});
-        }
+        // if (req.session.user){
+        //     res.render("all_comicspage", {text: "all comics", comicsarr: result, loggedInUser: (req.session.user["username"]) || "none" });
+        // } else {
+        //     res.render("all_comicspage", {text: "all comics", comicsarr: result});
+        // }
+
+        res.send({allComics: result});
         
 
     }).catch((error)=>{
+        res.send({msg : error});
         console.log(error);
     });
 
     //res.render("all_userspage", {text: "all users"});
-})
+});
 
+//this might need to be modified so that the chapter id is in the url
 router.get("/:comicid/chapter",(req,res)=>{
 
     console.log("START OF: /comics/:comicid/chapter");
@@ -179,11 +183,13 @@ router.get("/:comicid/chapter",(req,res)=>{
 
         //res.render("all_comicspage", {text: "all users", users: result});
 
-        if(req.session.user){
-            res.render("comicpage", {chapterId: req.query.chapterid, text: "for an individual comic", comic: comic , chapterid : req.query.chapterid , loggedInUser: (req.session.user["username"]) || "none" , userLiked:(req.session.user["liked"]), userId : (req.session.user["_id"])});
-        }else{
-            res.render("comicpage", {chapterId: req.query.chapterid, text: "for an individual comic", comic: comic , chapterid : req.query.chapterid });
-        }
+        // if(req.session.user){
+        //     res.render("comicpage", {chapterId: req.query.chapterid, text: "for an individual comic", comic: comic , chapterid : req.query.chapterid , loggedInUser: (req.session.user["username"]) || "none" , userLiked:(req.session.user["liked"]), userId : (req.session.user["_id"])});
+        // }else{
+        //     res.render("comicpage", {chapterId: req.query.chapterid, text: "for an individual comic", comic: comic , chapterid : req.query.chapterid });
+        // }
+
+        res.send(comic);
         
 
     }).catch((error)=>{
@@ -223,7 +229,7 @@ router.get("/:comicid/comic",(req,res)=>{
     //     }
     //   ]
 
-    user.findOne({"comics._id": req.params.comicid}
+    user.findOne({"comics._id": req.params.comicid},{'comics.chapters.pageImg' : 0}
         
         // {"comics.$[i].someNestedArray.$[j].name":"1"},
         // {
@@ -256,11 +262,13 @@ router.get("/:comicid/comic",(req,res)=>{
         }
         
 
-        if(req.session.user){
-            res.render("comicpage", {text: "for an individual comic", comic: comic , loggedInUser: (req.session.user["username"]) || "none" , userLiked:(req.session.user["liked"]), userId : (req.session.user["_id"])});
-        }else{
-            res.render("comicpage", {text: "for an individual comic", comic: comic});
-        }
+        // if(req.session.user){
+        //     res.render("comicpage", {text: "for an individual comic", comic: comic , loggedInUser: (req.session.user["username"]) || "none" , userLiked:(req.session.user["liked"]), userId : (req.session.user["_id"])});
+        // }else{
+        //     res.render("comicpage", {text: "for an individual comic", comic: comic});
+        // }
+
+        res.send({comic : comic});
 
     }).catch((error)=>{
         console.log(error);
@@ -268,7 +276,93 @@ router.get("/:comicid/comic",(req,res)=>{
 
 
     //res.render("all_userspage", {text: "all users"});
-})
+});
+
+// router.get("/:comicid/:chapterid",(req,res) => {
+
+//     console.log("START OF: /comics/:comicid/:chapterid");
+//     //console.log("req.query.chapterid : " + req.query.chapterid);
+
+//     user.findOne({"comics.chapters._id": req.params.chapterid}
+        
+//     ).then((result)=>{
+
+//         console.log(result);
+
+//         // const comic = findComic(result.comics,req.params.comicid);
+//         // console.log("comic : "+ comic);
+
+//         res.send({chapterImgs : result});
+//         //res.send({chapterImgs : comic});
+
+//     }).catch((error)=>{
+//         console.log(error);
+//         res.send({errorMsg : error});
+//     });
+
+
+// })
+
+// router.get("/:comicid/:chapterid",(req,res) => {
+
+//     console.log("START OF: /comics/:comicid/:chapterid");
+//     let idToSearch = new mongoose.Types.ObjectId(req.params.chapterid)
+
+//     //example of getting nested subdocuments!! = use aggregate with unwind + match + replaceroot
+//     user.aggregate([
+        
+//         { $unwind : "$comics" },
+//         { $unwind : "$comics.chapters"},
+//         { $match: {"comics.chapters._id": idToSearch}},
+//         { $replaceRoot: { newRoot: "$comics.chapters" } }
+        
+        
+//         ]
+//         ).then((result)=>{
+
+//          console.log(result);
+
+//         res.send({chapterImgs : result});
+        
+
+//     }).catch((error)=>{
+//         console.log(error);
+//         res.send({errorMsg : error});
+//     });
+
+// })
+
+router.get("/:comicid/:chapterid",(req,res) => {
+
+    console.log("START OF: /comics/:comicid/:chapterid");
+    let idToSearch = new mongoose.Types.ObjectId(req.params.comicid);
+
+    //example of getting nested subdocuments!! = use aggregate with unwind + match + replaceroot
+    user.aggregate([
+        
+        { $unwind : "$comics" },
+        //{ $unwind : "$comics.chapters"},
+        { $match: {"comics._id": idToSearch}},
+        //{ $replaceRoot: { newRoot: "$comics.chapters" } }
+
+        //use $project to exclude/include fields with aggregate
+        { $project: { "email": 0, "password": 0} }
+        
+        
+        ]
+        ).then((result)=>{
+
+         console.log(result);
+
+        res.send({chapterImgs : result});
+        
+
+    }).catch((error)=>{
+        console.log(error);
+        res.send({errorMsg : error});
+    });
+
+});
 
 
 

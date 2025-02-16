@@ -47,9 +47,11 @@ app.use(express.static('public'));
 function isAuthenticated (req, res, next) {
   if (req.session.user) {
     console.log("User " + req.session.user["username"] + " is authenticated")
+    //res.send(req.session.user);
+    
   } else 
-    console.log("No user is authencticated");
-
+    console.log("No user is authenticated");
+    //res.send({Msg : "Session does not exist"});
   next();
 }
 
@@ -100,15 +102,18 @@ app.get("/", isAuthenticated, (req,res) => {
         //notice here that the express-session session object is always stored/ can be retrieved from a routes request object
         console.log(req.session.user["username"]);
         //res.send({LoggedUser: req.session.user["username"]});
-        res.send(req.session.user);
+        var userDetails = req.session.user;
+        delete userDetails.password;
+        res.send(userDetails);
+        //res.send(req.session.user);
 
         //res.render("index", {loggedInUser: (req.session.user["username"]) || "none"});
     } else {
         //res.render("index");
-        res.send({Msg : "Session does not exist"});
+        res.send({msg : "Session does not exist"});
     }
         
-})
+});
 
 app.get("/userpage" , (req,res) => {
     console.log(req.session);
@@ -118,7 +123,7 @@ app.get("/userpage" , (req,res) => {
         res.render("user_editpage"); 
     }
     
-})
+});
 
 app.listen(PORT, () => {
     console.log("application running on port: " + PORT);
