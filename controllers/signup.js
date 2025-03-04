@@ -37,7 +37,8 @@ router.post("/", (req, res) => {
     //We have to use promises instead:
     user.create(req.body).then((result)=>{
         console.log(result);
-        res.render("index", {createdUser: result.username});
+        //res.render("index", {createdUser: result.username});
+        res.send({createdUser: result.username});
     }).catch((error)=>{
         console.log(error);
     });

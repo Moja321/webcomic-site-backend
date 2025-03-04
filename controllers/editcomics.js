@@ -190,8 +190,8 @@ router.post("/",upload.single('comicImg'),(req,res)=>{
         console.log(req.session.user);
         console.log("current session's id: " + req.session.id);
     
-        res.render("user_editpage", {info: "Comic created succesfully!", loggedInUser: req.session.user["username"], userComics: req.session.user["comics"]});
-        
+        //res.render("user_editpage", {info: "Comic created succesfully!", loggedInUser: req.session.user["username"], userComics: req.session.user["comics"]});
+        res.send (req.session.user["comics"]);
 
     }).catch((error)=>{
     console.log(error);
