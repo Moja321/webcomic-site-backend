@@ -35,7 +35,8 @@ router.get("/",(req,res)=>{
 //login.findOne implementation using promises (Model.findOne doesnt accept callbacks anymore)
 router.post("/",(req,res)=>{
 
-    login.findOne({username: req.body.username},{'comics.chapters':0,'email':0}).then((result)=>{
+    //include 'comics.chapters':0 if you want to exclude comic chapter docs
+    login.findOne({username: req.body.username},{'email':0}).then((result)=>{
 
         if (result) {
 

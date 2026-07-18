@@ -111,8 +111,12 @@ router.post("/",upload.single('comicImg'),(req,res)=>{
 //router.post("/", (req,res)=>{
 
     console.log("starting /comics post http request:")
-    console.log(req.file);
-    console.log(req.file.filename);
+    
+    console.log("req.body : ");
+    console.log(req.body);
+
+    // console.log(req.file);
+    // console.log(req.file.filename);
     var mainImgPath = req.file.path;
     console.log("mainImgPath :" + mainImgPath);
 
@@ -191,7 +195,10 @@ router.post("/",upload.single('comicImg'),(req,res)=>{
         console.log("current session's id: " + req.session.id);
     
         //res.render("user_editpage", {info: "Comic created succesfully!", loggedInUser: req.session.user["username"], userComics: req.session.user["comics"]});
+
+        //TODO 28/10/25 : find a way to send back the updated comics id/title name
         res.send (req.session.user["comics"]);
+        //res.send(comicId);
 
     }).catch((error)=>{
     console.log(error);
@@ -284,7 +291,8 @@ router.post("/edit-chapters/:id", (req,res) => {
             console.log("comic for edit is = " + comic);
 
             //re-render and pass result to comic_editpage.ejs
-            res.render("comic_editpage.ejs",{info: "No images were uploaded, please provide at least 1 comic page to upload", editComic: comic, errorMsg: errMsg});
+            //res.render("comic_editpage.ejs",{info: "No images were uploaded, please provide at least 1 comic page to upload", editComic: comic, errorMsg: errMsg});
+            res.send({msg : "No images were uploaded, please provide at least 1 comic page to upload"});
 
             return;
 
@@ -416,9 +424,13 @@ router.post("/edit-chapters/:id", (req,res) => {
 
         //re-render and pass result to comic_editpage.ejs
         if (req.session.user){
-            res.render("comic_editpage.ejs",{info : "Uploaded comic pages succesfully!", loggedInUser: req.session.user["username"],editComic: comic, errorMsg: success});
+            //res.render("comic_editpage.ejs",{info : "Uploaded comic pages succesfully!", loggedInUser: req.session.user["username"],editComic: comic, errorMsg: success});
+            //res.send (req.session.user["comics"]);
+            res.send({info : "Uploaded comic pages succesfully!"});
         } else {
-            res.render("comic_editpage.ejs",{info : "No user logged in"});
+            //res.render("comic_editpage.ejs",{info : "No user logged in"});
+            //res.send({info : "No user logged in"});
+            res.send({info : "No user logged in"});
         }
         
         
@@ -631,9 +643,14 @@ router.post("/edit-chapters/:id", (req,res) => {
 
 // });
 
-router.post("/chapters/:id", (req,res) => {
+router.post("/chapters/:id", upload.none(), (req,res) => {
     
     console.log("START OF editcomics/chapters/:id POST ROUTE:");
+
+    //TODO 28/10/25 : req.body is returning empty
+    console.log("req.body : ");
+    console.log(req.body);
+    console.log("req.params.id : " + req.params.id);
 
     //TODO:comicId is not defined
     user.findOneAndUpdate({ "_id": req.session.user["_id"], "comics._id": req.params.id },
@@ -691,9 +708,11 @@ router.post("/chapters/:id", (req,res) => {
         //res.render("comic_editpage.ejs",{editComic: comic});
 
         if(req.session.user){
-            res.render("comic_editpage", { info: "Chapter created succesfully!", editComic: comic , loggedInUser: (req.session.user["username"]) || "none" });
+            //res.render("comic_editpage", { info: "Chapter created succesfully!", editComic: comic , loggedInUser: (req.session.user["username"]) || "none" });
+            res.send (comic);
         }else{
-            res.render("comic_editpage", { editComic: comic });
+            //res.render("comic_editpage", { editComic: comic });
+            res.send ({info: "User not signed in"});
         }
 
     }).catch((error)=>{
@@ -702,6 +721,7 @@ router.post("/chapters/:id", (req,res) => {
 
 });
 
+//TODO 18/7/26
 //To update a comic series
 router.post("/:id", upload.single('comicImg'),(req, res) => {
     //   req.body.readyToEat = req.body.readyToEat === "on";
